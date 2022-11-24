@@ -1,6 +1,8 @@
-﻿using AzureBlobApplication.Service;
+﻿using Azure.Core;
+using AzureBlobApplication.Service;
 using Microsoft.AspNetCore.Http.Metadata;
 using Microsoft.AspNetCore.Mvc;
+using System;
 
 namespace AzureBlobApplication.Controllers
 {
@@ -17,20 +19,20 @@ namespace AzureBlobApplication.Controllers
             var blobList = await _blobService.GetAllBlob(containerName);
             return  View(blobList);
         }
-
-        public IActionResult AddFile()
+        [HttpGet]
+        public IActionResult AddFile(string containerName)
         {
             return View();
         }
         [HttpPost]
-        public async Task<IActionResult> AddFile(IFormFile formFile)
+        public async Task<IActionResult> AddFile(string containerName,IFormFile file)
         {
-            if (formFile == null || formFile.Length < -1) return View();
-            var fileName = Path.GetFileNameWithoutExtension(formFile.FileName) + "_" + Guid.NewGuid().ToString() + "_" + Path.GetExtension(formFile.FileName);
-            var result = await _blobService.UploadBlob(fileName, formFile, "images");
+            if (file == null || file.Length < -1) return View();
+            var fileName = Path.GetFileNameWithoutExtension(file.FileName) + "_" + Guid.NewGuid().ToString() + Path.GetExtension(file.FileName);
+            var result = await _blobService.UploadBlob(fileName, file, containerName);
             if(result)
             {
-                return View("Index", "Container");
+                return RedirectToAction("Index", "Container");
             }
             return View();
         }
