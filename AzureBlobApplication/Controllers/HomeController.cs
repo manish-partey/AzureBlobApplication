@@ -1,4 +1,6 @@
-﻿using AzureBlobApplication.Models;
+﻿using Azure.Storage.Blobs;
+using AzureBlobApplication.Models;
+using AzureBlobApplication.Service;
 using Microsoft.AspNetCore.Mvc;
 using System.Diagnostics;
 
@@ -6,16 +8,18 @@ namespace AzureBlobApplication.Controllers
 {
     public class HomeController : Controller
     {
-        private readonly ILogger<HomeController> _logger;
+        private readonly IContainerService _containerService;
+        
 
-        public HomeController(ILogger<HomeController> logger)
-        {
-            _logger = logger;
+        public HomeController(IContainerService containerService)
+        {   
+           _containerService= containerService;
         }
 
-        public IActionResult Index()
+        public async Task<IActionResult> Index()
         {
-            return View();
+            var getAllBlobsAndContainer = await _containerService.GetAllContaineraAndBlob();
+            return View(getAllBlobsAndContainer);
         }
 
         public IActionResult Privacy()

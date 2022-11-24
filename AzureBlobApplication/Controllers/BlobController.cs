@@ -17,7 +17,7 @@ namespace AzureBlobApplication.Controllers
         public async Task<IActionResult> Manage(string containerName)
         {
             var blobList = await _blobService.GetAllBlob(containerName);
-            return  View(blobList);
+            return View(blobList);
         }
         [HttpGet]
         public IActionResult AddFile(string containerName)
@@ -25,17 +25,27 @@ namespace AzureBlobApplication.Controllers
             return View();
         }
         [HttpPost]
-        public async Task<IActionResult> AddFile(string containerName,IFormFile file)
+        public async Task<IActionResult> AddFile(string containerName, IFormFile file)
         {
             if (file == null || file.Length < -1) return View();
             var fileName = Path.GetFileNameWithoutExtension(file.FileName) + "_" + Guid.NewGuid().ToString() + Path.GetExtension(file.FileName);
             var result = await _blobService.UploadBlob(fileName, file, containerName);
-            if(result)
+            if (result)
             {
                 return RedirectToAction("Index", "Container");
             }
             return View();
         }
 
+        public async Task<IActionResult> ViewFile(string containerName, string name)
+        {
+            return Redirect(await _blobService.GetBlob(containerName, name));
+
+        }
+        public async Task<IActionResult> DeleteFile(string containerName, string name)
+        {
+            await _blobService.DeleteBlob(name, containerName);
+            return RedirectToAction("Index", "Container");
+        }
     }
 }
